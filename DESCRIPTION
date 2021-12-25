@@ -21,3 +21,5 @@ Imports:
     tibble,
     magrittr,
     rlang (>= 0.1.2)
+URL: https://github.com/meerapatelmd/calculus
+BugReports: https://github.com/meerapatelmd/calculus/issues
