@@ -1,5 +1,5 @@
 Package: calculus
-Title: What the Package Does (One Line, Title Case)
+Title: Various financial and retail calculators.
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "Meera",
@@ -7,9 +7,10 @@ Authors@R:
            role = c("aut", "cre"),
            email = "patelmeeray@gmail.com",
            comment = c(ORCID = "0000-0002-3401-3948"))
-Description: What the package does (one paragraph).
+Description: Analyze savings and purchases.
 License: MIT + file LICENSE
 Suggests: 
+    covr,
     roxygen2,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
