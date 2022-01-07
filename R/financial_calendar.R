@@ -1,10 +1,3 @@
-
-
-
-# Create a financial calendar
-library(tidyverse)
-library(lubridate)
-
 weekday_index_map <-
   tribble(
     ~week_day_index, ~day_of_week,
@@ -45,6 +38,10 @@ month_index_map <-
 
 # Generate a long table that
 # can be pivoted into a pretty year calendar
+# Create a financial calendar
+library(tidyverse)
+library(lubridate)
+
 generate_year_tbl <-
   function(year = "2022") {
     year_dates <-
@@ -345,7 +342,15 @@ add_paycheck <-
   function(year_obj,
            default_paycheck = "4000",
            ...) {
-    if ("year_cal" %in% class(year_obj)) {
+    if ("list" %in% class(year_obj)) {
+
+      year_tibble <-
+        year_obj %>%
+        reduce(left_join,
+               by = "day_slot_index"
+        )
+
+    } else if ("year_cal" %in% class(year_obj)) {
       year_tibble <-
         cal_to_tbl(year_calendar = year_obj)
     } else {
@@ -464,6 +469,17 @@ add_paycheck <-
         class(pay_day_map)
       )
 
+    if ("list" %in% class(year_obj)) {
+
+      out <-
+        c(
+          year_obj,
+          pay_day_map =
+            pay_day_map
+        )
+
+
+    } else {
     out <-
       list(
         year_tibble =
@@ -477,6 +493,7 @@ add_paycheck <-
         pay_day_map =
           pay_day_map
       )
+    }
 
     out
   }
@@ -501,11 +518,11 @@ subtract_payment <-
 
 
     payment_map <-
-      enframe(rlang::list2(...),
+      enframe(unlist(rlang::list2(...)),
         name = "year_date",
         value = "payment"
       ) %>%
-      mutate(year_date = year_date) %>%
+      mutate(year_date = as.character(year_date)) %>%
       tidyr::unnest(cols = payment) %>%
       mutate(payment = sprintf("- %s", payment))
 
@@ -549,4 +566,189 @@ subtract_payment <-
         )
     }
     out
+  }
+
+
+
+previous_business_day <-
+  function(input_date) {
+
+    ymd_date <-
+      ymd(input_date)
+
+    input_weekday <-
+    weekdays(x = ymd_date,
+             abbreviate = TRUE)
+
+
+    if (input_weekday == "Sat") {
+
+      secretary::typewrite(
+        glue::glue("  {secretary::italicize(input_date)} occurs on a {weekdays(x = ymd_date, abbreviate = FALSE)}."),
+        timepunched = FALSE
+      )
+
+      new_date <-
+      ymd_date-1
+
+      secretary::typewrite(
+        glue::glue("  --> {secretary::enbold(new_date)} is the most previous business day ({weekdays(x = new_date, abbreviate = FALSE)})."),
+        timepunched = FALSE
+      )
+
+      invisible(as.character(new_date))
+
+    } else if (input_weekday == "Sun") {
+
+      secretary::typewrite(
+        glue::glue("  {secretary::italicize(input_date)} occurs on a {weekdays(x = ymd_date, abbreviate = FALSE)}."),
+        timepunched = FALSE
+      )
+
+      new_date <-
+      ymd_date-2
+
+      secretary::typewrite(
+        glue::glue("  --> {secretary::enbold(new_date)} is the most previous business day ({weekdays(x = new_date, abbreviate = FALSE)})."),
+        timepunched = FALSE
+      )
+
+      invisible(as.character(new_date))
+
+    } else {
+
+      secretary::typewrite(
+        glue::glue("  {secretary::italicize(input_date)} occurs on a business day ({weekdays(x = ymd_date, abbreviate = FALSE)})."),
+        timepunched = FALSE
+      )
+      invisible(as.character(ymd_date))
+    }
+
+
+  }
+
+
+next_business_day <-
+  function(input_date) {
+
+    ymd_date <-
+      ymd(input_date)
+
+    input_weekday <-
+      weekdays(x = ymd_date,
+               abbreviate = TRUE)
+
+
+    if (input_weekday == "Sat") {
+
+      secretary::typewrite(
+        glue::glue("  {secretary::italicize(input_date)} occurs on a {weekdays(x = ymd_date, abbreviate = FALSE)}."),
+        timepunched = FALSE
+      )
+
+      new_date <-
+        ymd_date+2
+
+      secretary::typewrite(
+        glue::glue("  --> {secretary::enbold(new_date)} is the next business day ({weekdays(x = new_date, abbreviate = FALSE)})."),
+        timepunched = FALSE
+      )
+
+      invisible(as.character(new_date))
+
+    } else if (input_weekday == "Sun") {
+
+      secretary::typewrite(
+        glue::glue("  {secretary::italicize(input_date)} occurs on a {weekdays(x = ymd_date, abbreviate = FALSE)}."),
+        timepunched = FALSE
+      )
+
+      new_date <-
+        ymd_date+1
+
+      secretary::typewrite(
+        glue::glue("  --> {secretary::enbold(new_date)} is the next business day ({weekdays(x = new_date, abbreviate = FALSE)})."),
+        timepunched = FALSE
+      )
+
+      invisible(as.character(new_date))
+
+    } else {
+
+      secretary::typewrite(
+        glue::glue("  {secretary::italicize(input_date)} occurs on a business day ({weekdays(x = ymd_date, abbreviate = FALSE)})."),
+        timepunched = FALSE
+      )
+      invisible(as.character(ymd_date))
+    }
+
+
+  }
+
+
+# Roth IRA Savings
+first_payment_per_month <-
+  sprintf("2022-%s-01",
+          str_pad(1:12,
+                  width = 2,
+                  side = "left",
+                  pad = "0"))
+
+first_payment_per_month <-
+sapply(first_payment_per_month,
+       next_business_day) %>%
+  enframe(name = "input_date", value = "actual_date")
+
+second_payment_per_month <-
+  sprintf("2022-%s-15",
+          str_pad(1:12,
+                  width = 2,
+                  side = "left",
+                  pad = "0"))
+
+second_payment_per_month <-
+  sapply(second_payment_per_month,
+         next_business_day) %>%
+  enframe(name = "input_date", value = "actual_date")
+
+roth_transfer_dates <-
+  c(first_payment_per_month$actual_date,
+    second_payment_per_month$actual_date) %>%
+  sort()
+
+roth_transfers <- rep(273, length(roth_transfer_dates))
+names(roth_transfers) <-
+  roth_transfer_dates
+
+rent_per_month <-
+  sprintf("2022-%s-28",
+          str_pad(1:12,
+                  width = 2,
+                  side = "left",
+                  pad = "0"))
+rent_per_month <-
+  sapply(ymd(rent_per_month),
+         previous_business_day)
+
+rent_payments <-
+  rep(2300, length(rent_per_month))
+names(rent_payments) <-
+  rent_per_month
+
+all_payments <-
+  c(roth_transfers,
+    rent_payments)
+
+year_2022_tbl <- generate_year_tbl()
+year_2022 <- add_paycheck(year_2022_tbl)
+year_2022b <-
+  subtract_payment(year_2022,
+                   !!!all_payments)
+
+
+
+
+test_arg0 <-
+  function(...) {
+    rlang::list2(...)
   }

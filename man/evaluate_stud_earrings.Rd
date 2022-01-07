@@ -7,11 +7,13 @@
 evaluate_stud_earrings(
   listed_cost,
   total_carats,
-  color,
-  clarity,
   metal,
-  gia_cut_grade = "",
-  fluorescence = ""
+  retailer,
+  url,
+  color = c("Not Listed", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"),
+  clarity = c("Not Listed", "FL", "IF", "VVS1", "VS1", "VS2", "SI1", "SI2"),
+  gia_cut_grade = c("Not Listed", "Excellent", "Very Good", "Good"),
+  fluorescence = c("Not Listed", "None", "Faint", "Medium", "Strong", "+Strong")
 )
 }
 \description{
