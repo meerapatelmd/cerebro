@@ -13,18 +13,18 @@ weekday_index_map <-
 month_index_map <-
   tibble::tribble(
     ~`month_number`, ~`month_name`,
-    '01','Jan',
-    '02','Feb',
-    '03','Mar',
-    '04','Apr',
-    '05','May',
-    '06','Jun',
-    '07','Jul',
-    '08','Aug',
-    '09','Sep',
-    '10','Oct',
-    '11','Nov',
-    '12','Dec'
+    "01", "Jan",
+    "02", "Feb",
+    "03", "Mar",
+    "04", "Apr",
+    "05", "May",
+    "06", "Jun",
+    "07", "Jul",
+    "08", "Aug",
+    "09", "Sep",
+    "10", "Oct",
+    "11", "Nov",
+    "12", "Dec"
   )
 
 # Basic Columns for Ledger
@@ -49,11 +49,11 @@ library(lubridate)
 
 generate_annual_ledger <-
   function(year = "2022") {
-
     year_dates <-
       as.Date(
         ymd(sprintf("%s-01-01", year)):ymd(sprintf("%s-12-31", year)),
-        origin = ymd("1970-01-01"))
+        origin = ymd("1970-01-01")
+      )
 
 
     day_of_week <-
@@ -313,18 +313,17 @@ cal_to_tbl <-
 get_paycheck_tbl <-
   function(year = "2022",
            default_paycheck = "4000") {
-
-
     year_dates <-
       as.Date(
         ymd(sprintf("%s-01-01", year)):ymd(sprintf("%s-12-31", year)),
-        origin = ymd("1970-01-01")) %>%
+        origin = ymd("1970-01-01")
+      ) %>%
       as.character()
 
 
 
     paycheck_date0 <-
-    lubridate::days_in_month(year_dates) %>%
+      lubridate::days_in_month(year_dates) %>%
       enframe() %>%
       distinct() %>%
       mutate(
@@ -333,25 +332,33 @@ get_paycheck_tbl <-
             1:12,
             width = 2,
             pad = "0",
-            side = "left")) %>%
+            side = "left"
+          )
+      ) %>%
       transmute(
         paycheck_1 =
-          sprintf("%s-%s-15",
-                  year,
-                  month_number),
+          sprintf(
+            "%s-%s-15",
+            year,
+            month_number
+          ),
         paycheck_2 =
-          sprintf("%s-%s-%s",
-                  year,
-                  month_number,
-                  value)
-        ) %>%
+          sprintf(
+            "%s-%s-%s",
+            year,
+            month_number,
+            value
+          )
+      ) %>%
       unlist() %>%
       unname() %>%
       sort()
 
     paycheck_date <-
-    sapply(paycheck_date0,
-           previous_business_day)
+      sapply(
+        paycheck_date0,
+        previous_business_day
+      )
     paycheck_date <-
       unname(paycheck_date)
 
@@ -365,13 +372,11 @@ add_paycheck <-
            default_paycheck = "4000",
            ...) {
     if ("list" %in% class(year_obj)) {
-
       year_tibble <-
         year_obj %>%
         reduce(left_join,
-               by = "day_slot_index"
+          by = "day_slot_index"
         )
-
     } else if ("year_cal" %in% class(year_obj)) {
       year_tibble <-
         cal_to_tbl(year_calendar = year_obj)
@@ -492,29 +497,26 @@ add_paycheck <-
       )
 
     if ("list" %in% class(year_obj)) {
-
       out <-
         c(
           year_obj,
           pay_day_map =
             pay_day_map
         )
-
-
     } else {
-    out <-
-      list(
-        year_tibble =
-          pay_day_tibble %>%
-            select(
-              -custom_paycheck,
-              -default_paycheck,
-              -paycheck,
-              -pay_day_number
-            ),
-        pay_day_map =
-          pay_day_map
-      )
+      out <-
+        list(
+          year_tibble =
+            pay_day_tibble %>%
+              select(
+                -custom_paycheck,
+                -default_paycheck,
+                -paycheck,
+                -pay_day_number
+              ),
+          pay_day_map =
+            pay_day_map
+        )
     }
 
     out
@@ -595,32 +597,44 @@ subtract_payment <-
 
 # Roth IRA Savings
 first_payment_per_month <-
-  sprintf("2022-%s-01",
-          str_pad(1:12,
-                  width = 2,
-                  side = "left",
-                  pad = "0"))
+  sprintf(
+    "2022-%s-01",
+    str_pad(1:12,
+      width = 2,
+      side = "left",
+      pad = "0"
+    )
+  )
 
 first_payment_per_month <-
-sapply(first_payment_per_month,
-       next_business_day) %>%
+  sapply(
+    first_payment_per_month,
+    next_business_day
+  ) %>%
   enframe(name = "input_date", value = "actual_date")
 
 second_payment_per_month <-
-  sprintf("2022-%s-15",
-          str_pad(1:12,
-                  width = 2,
-                  side = "left",
-                  pad = "0"))
+  sprintf(
+    "2022-%s-15",
+    str_pad(1:12,
+      width = 2,
+      side = "left",
+      pad = "0"
+    )
+  )
 
 second_payment_per_month <-
-  sapply(second_payment_per_month,
-         next_business_day) %>%
+  sapply(
+    second_payment_per_month,
+    next_business_day
+  ) %>%
   enframe(name = "input_date", value = "actual_date")
 
 roth_transfer_dates <-
-  c(first_payment_per_month$actual_date,
-    second_payment_per_month$actual_date) %>%
+  c(
+    first_payment_per_month$actual_date,
+    second_payment_per_month$actual_date
+  ) %>%
   sort()
 
 roth_transfers <- rep(273, length(roth_transfer_dates))
@@ -628,14 +642,19 @@ names(roth_transfers) <-
   roth_transfer_dates
 
 rent_per_month <-
-  sprintf("2022-%s-28",
-          str_pad(1:12,
-                  width = 2,
-                  side = "left",
-                  pad = "0"))
+  sprintf(
+    "2022-%s-28",
+    str_pad(1:12,
+      width = 2,
+      side = "left",
+      pad = "0"
+    )
+  )
 rent_per_month <-
-  sapply(ymd(rent_per_month),
-         previous_business_day)
+  sapply(
+    ymd(rent_per_month),
+    previous_business_day
+  )
 
 rent_payments <-
   rep(2300, length(rent_per_month))
@@ -643,14 +662,18 @@ names(rent_payments) <-
   rent_per_month
 
 all_payments <-
-  c(roth_transfers,
-    rent_payments)
+  c(
+    roth_transfers,
+    rent_payments
+  )
 
 year_2022_tbl <- generate_year_tbl()
 year_2022 <- add_paycheck(year_2022_tbl)
 year_2022b <-
-  subtract_payment(year_2022,
-                   !!!all_payments)
+  subtract_payment(
+    year_2022,
+    !!!all_payments
+  )
 
 
 
