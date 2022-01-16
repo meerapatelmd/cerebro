@@ -1,5 +1,5 @@
 weekday_index_map <-
-  tribble(
+  tibble::tribble(
     ~week_day_index, ~day_of_week,
     1, "Sun",
     2, "Mon",
@@ -13,28 +13,33 @@ weekday_index_map <-
 month_index_map <-
   tibble::tribble(
     ~`month_number`, ~`month_name`,
-    1, "Jan",
-    2, "Feb",
-    3, "Mar",
-    4, "Apr",
-    5, "May",
-    6, "Jun",
-    7, "Jul",
-    8, "Aug",
-    9, "Sep",
-    10, "Oct",
-    11, "Nov",
-    12, "Dec"
-  ) %>%
-  mutate_all(as.character) %>%
-  mutate(
-    month_number =
-      str_pad(month_number,
-        width = 2,
-        side = "left",
-        pad = "0"
-      )
+    '01','Jan',
+    '02','Feb',
+    '03','Mar',
+    '04','Apr',
+    '05','May',
+    '06','Jun',
+    '07','Jul',
+    '08','Aug',
+    '09','Sep',
+    '10','Oct',
+    '11','Nov',
+    '12','Dec'
   )
+
+# Basic Columns for Ledger
+core_cols <-
+  c(
+    "day_slot_index",
+    "month_number",
+    "month_name",
+    "week_number",
+    "day_of_week",
+    "month_day_number",
+    "year_date_str",
+    "year_date"
+  )
+
 
 # Generate a long table that
 # can be pivoted into a pretty year calendar
@@ -42,10 +47,13 @@ month_index_map <-
 library(tidyverse)
 library(lubridate)
 
-generate_year_tbl <-
+generate_annual_ledger <-
   function(year = "2022") {
+
     year_dates <-
-      as.Date(ymd(sprintf("%s-01-01", year)):ymd(sprintf("%s-12-31", year)), origin = ymd("1970-01-01"))
+      as.Date(
+        ymd(sprintf("%s-01-01", year)):ymd(sprintf("%s-12-31", year)),
+        origin = ymd("1970-01-01"))
 
 
     day_of_week <-
@@ -53,6 +61,7 @@ generate_year_tbl <-
         x = year_dates,
         abbreviate = TRUE
       )
+
     month_day_number <-
       day(year_dates)
     month_name <-
@@ -87,18 +96,6 @@ generate_year_tbl <-
         week_number,
         month_name,
         month_day_number
-      )
-
-    weekday_index_map <-
-      tribble(
-        ~week_day_index, ~day_of_week,
-        1, "Sun",
-        2, "Mon",
-        3, "Tue",
-        4, "Wed",
-        5, "Thu",
-        6, "Fri",
-        7, "Sat"
       )
 
     raw_calendar_tbl_2 <-
@@ -150,12 +147,13 @@ generate_year_tbl <-
 
     class(out) <-
       c(
-        "year_tbl",
+        "ledger",
         class(out)
       )
 
     out
   }
+
 
 # Fill in the partially complete weeks at the beginning
 # of each month
@@ -190,45 +188,21 @@ fill_in_partial_1st_week <-
     }
   }
 
-core_cols <-
-  c(
-    "day_slot_index",
-    "month_number",
-    "month_name",
-    "week_number",
-    "day_of_week",
-    "month_day_number",
-    "year_date_str",
-    "year_date"
-  )
 
-
-tbl_to_cal <-
-  function(year_tibble) {
-    if (!("year_tbl" %in% class(year_tibble))) {
-      stop("`year_tibble` must be of 'year_tbl' class.")
+ledger_to_cal <-
+  function(ledger_obj) {
+    if (!("ledger" %in% class(ledger_obj))) {
+      stop("`ledger_obj` must be of 'ledger' class.")
     }
 
-    core_cols <-
-      c(
-        "day_slot_index",
-        "month_number",
-        "month_name",
-        "week_number",
-        "day_of_week",
-        "month_day_number",
-        "year_date_str",
-        "year_date"
-      )
-
     extra_cols <-
-      year_tibble %>%
+      ledger_obj %>%
       select(!any_of(core_cols)) %>%
       colnames()
 
     if (length(extra_cols) > 0) {
       value_df <-
-        year_tibble %>%
+        ledger_obj %>%
         select(
           day_slot_index,
           month_day_number,
@@ -256,20 +230,20 @@ tbl_to_cal <-
           na.rm = FALSE
         )
 
-      year_tibble2 <-
-        year_tibble %>%
+      ledger_obj2 <-
+        ledger_obj %>%
         left_join(value_df,
           by = "day_slot_index"
         )
     } else {
-      year_tibble2 <-
-        year_tibble %>%
+      ledger_obj2 <-
+        ledger_obj %>%
         mutate(value = month_day_number)
     }
 
     out <-
       pivot_wider(
-        data = year_tibble2,
+        data = ledger_obj2,
         id_cols = c(month_name, week_number),
         names_from = day_of_week,
         values_from = value
@@ -336,6 +310,54 @@ cal_to_tbl <-
   }
 
 
+get_paycheck_tbl <-
+  function(year = "2022",
+           default_paycheck = "4000") {
+
+
+    year_dates <-
+      as.Date(
+        ymd(sprintf("%s-01-01", year)):ymd(sprintf("%s-12-31", year)),
+        origin = ymd("1970-01-01")) %>%
+      as.character()
+
+
+
+    paycheck_date0 <-
+    lubridate::days_in_month(year_dates) %>%
+      enframe() %>%
+      distinct() %>%
+      mutate(
+        month_number =
+          stringr::str_pad(
+            1:12,
+            width = 2,
+            pad = "0",
+            side = "left")) %>%
+      transmute(
+        paycheck_1 =
+          sprintf("%s-%s-15",
+                  year,
+                  month_number),
+        paycheck_2 =
+          sprintf("%s-%s-%s",
+                  year,
+                  month_number,
+                  value)
+        ) %>%
+      unlist() %>%
+      unname() %>%
+      sort()
+
+    paycheck_date <-
+    sapply(paycheck_date0,
+           previous_business_day)
+    paycheck_date <-
+      unname(paycheck_date)
+
+    tibble(paycheck_date)
+  }
+
 # Pay days are on the last days of the month if the last day falls on a business
 # day. If not, then pay day is the day before.
 add_paycheck <-
@@ -369,7 +391,7 @@ add_paycheck <-
         sprintf("+ %s", unlist(custom_paycheck_map$custom_paycheck))
     } else {
       custom_paycheck_map <-
-        tribble(~year_date, ~custom_paycheck)
+        tibble::tribble(~year_date, ~custom_paycheck)
     }
 
 
@@ -569,121 +591,6 @@ subtract_payment <-
   }
 
 
-
-previous_business_day <-
-  function(input_date) {
-
-    ymd_date <-
-      ymd(input_date)
-
-    input_weekday <-
-    weekdays(x = ymd_date,
-             abbreviate = TRUE)
-
-
-    if (input_weekday == "Sat") {
-
-      secretary::typewrite(
-        glue::glue("  {secretary::italicize(input_date)} occurs on a {weekdays(x = ymd_date, abbreviate = FALSE)}."),
-        timepunched = FALSE
-      )
-
-      new_date <-
-      ymd_date-1
-
-      secretary::typewrite(
-        glue::glue("  --> {secretary::enbold(new_date)} is the most previous business day ({weekdays(x = new_date, abbreviate = FALSE)})."),
-        timepunched = FALSE
-      )
-
-      invisible(as.character(new_date))
-
-    } else if (input_weekday == "Sun") {
-
-      secretary::typewrite(
-        glue::glue("  {secretary::italicize(input_date)} occurs on a {weekdays(x = ymd_date, abbreviate = FALSE)}."),
-        timepunched = FALSE
-      )
-
-      new_date <-
-      ymd_date-2
-
-      secretary::typewrite(
-        glue::glue("  --> {secretary::enbold(new_date)} is the most previous business day ({weekdays(x = new_date, abbreviate = FALSE)})."),
-        timepunched = FALSE
-      )
-
-      invisible(as.character(new_date))
-
-    } else {
-
-      secretary::typewrite(
-        glue::glue("  {secretary::italicize(input_date)} occurs on a business day ({weekdays(x = ymd_date, abbreviate = FALSE)})."),
-        timepunched = FALSE
-      )
-      invisible(as.character(ymd_date))
-    }
-
-
-  }
-
-
-next_business_day <-
-  function(input_date) {
-
-    ymd_date <-
-      ymd(input_date)
-
-    input_weekday <-
-      weekdays(x = ymd_date,
-               abbreviate = TRUE)
-
-
-    if (input_weekday == "Sat") {
-
-      secretary::typewrite(
-        glue::glue("  {secretary::italicize(input_date)} occurs on a {weekdays(x = ymd_date, abbreviate = FALSE)}."),
-        timepunched = FALSE
-      )
-
-      new_date <-
-        ymd_date+2
-
-      secretary::typewrite(
-        glue::glue("  --> {secretary::enbold(new_date)} is the next business day ({weekdays(x = new_date, abbreviate = FALSE)})."),
-        timepunched = FALSE
-      )
-
-      invisible(as.character(new_date))
-
-    } else if (input_weekday == "Sun") {
-
-      secretary::typewrite(
-        glue::glue("  {secretary::italicize(input_date)} occurs on a {weekdays(x = ymd_date, abbreviate = FALSE)}."),
-        timepunched = FALSE
-      )
-
-      new_date <-
-        ymd_date+1
-
-      secretary::typewrite(
-        glue::glue("  --> {secretary::enbold(new_date)} is the next business day ({weekdays(x = new_date, abbreviate = FALSE)})."),
-        timepunched = FALSE
-      )
-
-      invisible(as.character(new_date))
-
-    } else {
-
-      secretary::typewrite(
-        glue::glue("  {secretary::italicize(input_date)} occurs on a business day ({weekdays(x = ymd_date, abbreviate = FALSE)})."),
-        timepunched = FALSE
-      )
-      invisible(as.character(ymd_date))
-    }
-
-
-  }
 
 
 # Roth IRA Savings

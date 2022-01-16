@@ -1,8 +1,20 @@
+
+#' @importFrom cli combine_ansi_styles
+
 bold_red <-
   cli::combine_ansi_styles("bold", "red4")
 
+#' @importFrom cli combine_ansi_styles
+
 bold_green <-
   cli::combine_ansi_styles("bold", "green")
+
+#' @title
+#' Calculate the Previous Business Day
+#' @rdname previous_business_day
+#' @export
+#' @import lubridate
+#' @importFrom cli cli_inform
 
 previous_business_day <-
   function(input_date,
@@ -86,6 +98,13 @@ previous_business_day <-
 
   }
 
+
+#' @title
+#' Calculate the Next Business Day
+#' @rdname next_business_day
+#' @export
+#' @import lubridate
+#' @importFrom cli cli_inform
 
 next_business_day <-
   function(input_date,
