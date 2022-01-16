@@ -56,6 +56,13 @@ EstimatedAccountBalance <-
   )
 
 
+#' @title
+#' Format Currency
+#'
+#' @rdname fmt_currency
+#' @family Formatting functions
+#' @export
+
 
 fmt_currency <-
   function(x) {

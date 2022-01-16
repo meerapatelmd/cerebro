@@ -7,8 +7,11 @@
 #'
 #' @export
 #' @import httr
+#' @import R.cache
+#' @import secretary
+#' @rdname get_daylight_times
 
-get_sun_times <-
+get_daylight_times <-
   function(latitude = 40.73,
            longitude = -74,
            start_date = "2022-01-10",
@@ -38,7 +41,7 @@ get_sun_times <-
       cache_file_path <-
         R.cache::findCache(
           key = key,
-          dirs = "calculus"
+          dirs = "cerebro"
         )
 
       if (is.null(cache_file_path)) {
@@ -66,7 +69,7 @@ get_sun_times <-
         R.cache::saveCache(
           object = output[[input_date]],
           key = key,
-          dirs = "calculus"
+          dirs = "cerebro"
         )
 
         # print(output[[input_date]])
@@ -74,7 +77,7 @@ get_sun_times <-
         output[[input_date]] <-
           R.cache::loadCache(
             key = key,
-            dirs = "calculus"
+            dirs = "cerebro"
           )
 
         # print(output[[input_date]])

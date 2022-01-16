@@ -44,8 +44,6 @@ core_cols <-
 # Generate a long table that
 # can be pivoted into a pretty year calendar
 # Create a financial calendar
-library(tidyverse)
-library(lubridate)
 
 generate_annual_ledger <-
   function(year = "2022") {
@@ -590,95 +588,4 @@ subtract_payment <-
         )
     }
     out
-  }
-
-
-
-
-# Roth IRA Savings
-first_payment_per_month <-
-  sprintf(
-    "2022-%s-01",
-    str_pad(1:12,
-      width = 2,
-      side = "left",
-      pad = "0"
-    )
-  )
-
-first_payment_per_month <-
-  sapply(
-    first_payment_per_month,
-    next_business_day
-  ) %>%
-  enframe(name = "input_date", value = "actual_date")
-
-second_payment_per_month <-
-  sprintf(
-    "2022-%s-15",
-    str_pad(1:12,
-      width = 2,
-      side = "left",
-      pad = "0"
-    )
-  )
-
-second_payment_per_month <-
-  sapply(
-    second_payment_per_month,
-    next_business_day
-  ) %>%
-  enframe(name = "input_date", value = "actual_date")
-
-roth_transfer_dates <-
-  c(
-    first_payment_per_month$actual_date,
-    second_payment_per_month$actual_date
-  ) %>%
-  sort()
-
-roth_transfers <- rep(273, length(roth_transfer_dates))
-names(roth_transfers) <-
-  roth_transfer_dates
-
-rent_per_month <-
-  sprintf(
-    "2022-%s-28",
-    str_pad(1:12,
-      width = 2,
-      side = "left",
-      pad = "0"
-    )
-  )
-rent_per_month <-
-  sapply(
-    ymd(rent_per_month),
-    previous_business_day
-  )
-
-rent_payments <-
-  rep(2300, length(rent_per_month))
-names(rent_payments) <-
-  rent_per_month
-
-all_payments <-
-  c(
-    roth_transfers,
-    rent_payments
-  )
-
-year_2022_tbl <- generate_year_tbl()
-year_2022 <- add_paycheck(year_2022_tbl)
-year_2022b <-
-  subtract_payment(
-    year_2022,
-    !!!all_payments
-  )
-
-
-
-
-test_arg0 <-
-  function(...) {
-    rlang::list2(...)
   }
