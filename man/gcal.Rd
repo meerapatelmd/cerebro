@@ -4,7 +4,13 @@
 \alias{gcal}
 \title{Google Calendar Import Dataframe}
 \usage{
-gcal()
+gcal(
+  subject = "New Event",
+  start_date_day_number,
+  start_date_year,
+  start_date_offset = c("none", "previous_business_day", "next_business_day"),
+  verbose = TRUE
+)
 }
 \description{
 Create a dataframe that can be imported
