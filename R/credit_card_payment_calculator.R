@@ -16,7 +16,7 @@ setMethod(
     monthly_payment <- object@value
     payments_left <- object@payments_left
     cli::cli_text(
-      "{monthly_payment} at {payments_left} payments left."
+      "{fmt_currency(monthly_payment)} at {payments_left} payments left."
     )
   }
 )

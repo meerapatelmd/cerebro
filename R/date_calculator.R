@@ -76,6 +76,25 @@ previous_business_day <-
     }
   }
 
+#' @title
+#' Previous Business Days of a Vector of Dates
+#'
+#' @rdname previous_business_days
+#' @export
+
+
+previous_business_days <-
+  function(input_dates,
+           verbose = TRUE) {
+
+    sapply(input_dates,
+           previous_business_day,
+           verbose = verbose,
+           USE.NAMES = FALSE)
+
+
+  }
+
 
 #' @title
 #' Calculate the Next Business Day
@@ -142,4 +161,25 @@ next_business_day <-
         as.character(ymd_date)
       }
     }
+  }
+
+
+
+#' @title
+#' Next Business Days of a Vector of Dates
+#'
+#' @rdname next_business_days
+#' @export
+
+
+next_business_days <-
+  function(input_dates,
+           verbose = TRUE) {
+
+    sapply(input_dates,
+           next_business_day,
+           verbose = verbose,
+           USE.NAMES = FALSE)
+
+
   }
