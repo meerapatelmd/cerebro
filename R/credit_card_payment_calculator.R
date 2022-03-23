@@ -30,7 +30,8 @@ setMethod(
 #' @importFrom tibble tibble
 
 wf_reflect_payment <-
-  function(balance) {
+  function(balance,
+           ending_balance = (18000/3)) {
     payment_due_date <-
       c(
         as.Date("2021-12-21"),
@@ -134,7 +135,7 @@ wf_reflect_payment <-
           out <-
             MonthlyPayment(
               value =
-                balance / payments_left,
+                (balance - ending_balance) / payments_left,
               payments_left = payments_left
             )
 
@@ -153,7 +154,8 @@ wf_reflect_payment <-
 #' @importFrom tibble tibble
 
 us_bank_payment <-
-  function(balance) {
+  function(balance,
+           ending_balance = (10000*.3)) {
     payment_due_dates <-
       c(
         "2021-09-16",
@@ -261,7 +263,7 @@ us_bank_payment <-
           out <-
             MonthlyPayment(
               value =
-                balance / payments_left,
+                (balance - ending_balance) / payments_left,
               payments_left = payments_left
             )
 
