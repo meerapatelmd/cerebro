@@ -7,7 +7,7 @@ MonthlyPayment <-
         value = "numeric",
         payments_left = "integer",
         credit_limit = "numeric",
-        ending_balance = "numeric",
+        final_balance = "numeric",
         last_payment_date = "character"
       )
   )
@@ -19,7 +19,7 @@ setMethod(
     monthly_payment <- object@value
     payments_left <- object@payments_left
     credit_limit <- object@credit_limit
-    ending_balance <- object@ending_balance
+    final_balance <- object@final_balance
     last_due_date <- object@last_payment_date
     cli::cli_text(
       "{fmt_currency(monthly_payment)} at {payments_left} payments left."
@@ -28,7 +28,7 @@ setMethod(
       "Total Paid Off: {fmt_currency(payments_left*monthly_payment)}"
     )
     cli::cli_text(
-      "Ending Balance: {fmt_currency(ending_balance)}"
+      "Ending Balance: {fmt_currency(final_balance)}"
     )
     cli::cli_text(
       "Limit: {fmt_currency(credit_limit)}"

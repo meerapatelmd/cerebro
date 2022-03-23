@@ -1,16 +1,20 @@
 #' @title
-#' Calculate CC Payment
-#' @rdname calculate_cc_payment
+#' Calculate CC Payoff
+#'
+#' @description
+#' Calculate how much a credit card will be paid off
+#' with a given monthly payment.
+#' @rdname calculate_cc_payoff
 #' @export
 #' @importFrom lubridate day as_date
 #' @importFrom tibble tibble
 
-calculate_cc_payment <-
-  function(balance,
+calculate_cc_payoff <-
+  function(monthly_payment,
+           balance,
            first_due_date,
            last_due_date,
-           credit_limit,
-           ending_balance) {
+           credit_limit) {
 
     # Getting day number for last due date
     day_number <- as.character(lubridate::day(lubridate::as_date(last_due_date)))
@@ -53,11 +57,12 @@ calculate_cc_payment <-
           payments_left <-
             schedule_lookup$payments_left[i]
 
+          ending_balance <-
+            balance-(monthly_payment*payments_left)
 
           out <-
             MonthlyPayment(
-              value =
-                (balance - ending_balance) / payments_left,
+              value = monthly_payment,
               payments_left = payments_left,
               credit_limit = credit_limit,
               ending_balance = ending_balance,
@@ -69,52 +74,4 @@ calculate_cc_payment <-
         }
       }
     }
-  }
-
-#' @title Calculate WF Payment
-#' @rdname calculate_wf_payment
-#' @export
-
-
-calculate_wf_payment <-
-  function(
-    balance,
-    first_due_date = "2021-12-21",
-    last_due_date  = "2023-08-21",
-    credit_limit   = 18000,
-    ending_balance = 5400) {
-
-
-    calculate_cc_payment(
-      balance = balance,
-      first_due_date = first_due_date,
-      last_due_date = last_due_date,
-      credit_limit = credit_limit,
-      ending_balance = ending_balance
-    )
-
-  }
-
-
-#' @title Calculate US Bank Payment
-#' @rdname calculate_usbank_payment
-#' @export
-
-calculate_usbank_payment <-
-  function(
-    balance,
-    first_due_date = "2021-09-16",
-    last_due_date  = "2023-04-16",
-    credit_limit   = 10000,
-    ending_balance = 3000) {
-
-
-    calculate_cc_payment(
-      balance = balance,
-      first_due_date = first_due_date,
-      last_due_date = last_due_date,
-      credit_limit = credit_limit,
-      ending_balance = ending_balance
-    )
-
   }
