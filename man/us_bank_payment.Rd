@@ -4,7 +4,7 @@
 \alias{us_bank_payment}
 \title{US Bank Payment}
 \usage{
-us_bank_payment(balance)
+us_bank_payment(balance, ending_balance = (10000 * 0.3))
 }
 \description{
 US Bank Payment

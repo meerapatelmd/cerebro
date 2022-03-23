@@ -5,7 +5,10 @@ MonthlyPayment <-
     slots =
       c(
         value = "numeric",
-        payments_left = "integer"
+        payments_left = "integer",
+        credit_limit = "numeric",
+        ending_balance = "numeric",
+        last_payment_date = "character"
       )
   )
 
@@ -15,8 +18,24 @@ setMethod(
   definition = function(object) {
     monthly_payment <- object@value
     payments_left <- object@payments_left
+    credit_limit <- object@credit_limit
+    ending_balance <- object@ending_balance
+    last_due_date <- object@last_payment_date
     cli::cli_text(
       "{fmt_currency(monthly_payment)} at {payments_left} payments left."
+    )
+    cli::cli_text(
+      "Total Paid Off: {fmt_currency(payments_left*monthly_payment)}"
+    )
+    cli::cli_text(
+      "Ending Balance: {fmt_currency(ending_balance)}"
+    )
+    cli::cli_text(
+      "Limit: {fmt_currency(credit_limit)}"
+    )
+
+    cli::cli_text(
+      "Last Due Date: {last_due_date}"
     )
   }
 )
@@ -31,112 +50,61 @@ setMethod(
 
 wf_reflect_payment <-
   function(balance,
+           first_due_date = "2021-12-21",
+           last_due_date = "2023-08-21",
+           credit_limit = 18000,
            ending_balance = (18000/3)) {
-    payment_due_date <-
-      c(
-        as.Date("2021-12-21"),
-        as.Date("2022-01-21"),
-        as.Date("2022-02-21"),
-        as.Date("2022-03-21"),
-        as.Date("2022-04-21"),
-        as.Date("2022-05-21"),
-        as.Date("2022-06-21"),
-        as.Date("2022-07-21"),
-        as.Date("2022-08-21"),
-        as.Date("2022-09-21"),
-        as.Date("2022-10-21"),
-        as.Date("2022-11-21"),
-        as.Date("2022-12-21"),
-        as.Date("2023-01-21"),
-        as.Date("2023-02-21"),
-        as.Date("2023-03-21"),
-        as.Date("2023-04-21"),
-        as.Date("2023-05-21"),
-        as.Date("2023-06-21"),
-        as.Date("2023-07-21"),
-        as.Date("2023-08-21")
-      )
 
+    # Getting day number for last due date
+    day_number <- as.character(lubridate::day(lubridate::as_date(last_due_date)))
+
+    # Getting all dates between first due date and last due date
+    all_dates <-
+      as.character(lubridate::as_date(lubridate::as_date(first_due_date):lubridate::as_date(last_due_date)))
+
+    payment_due_date <-
+      lubridate::as_date(grep(x = all_dates, pattern = sprintf("%s$", day_number), value = TRUE))
+    grace_period_end_date <-
+      payment_due_date-1
 
     grace_period_start_date <-
-      c(
-        as.Date("2021-11-21"),
-        as.Date("2021-12-21"),
-        as.Date("2022-01-21"),
-        as.Date("2022-02-21"),
-        as.Date("2022-03-21"),
-        as.Date("2022-04-21"),
-        as.Date("2022-05-21"),
-        as.Date("2022-06-21"),
-        as.Date("2022-07-21"),
-        as.Date("2022-08-21"),
-        as.Date("2022-09-21"),
-        as.Date("2022-10-21"),
-        as.Date("2022-11-21"),
-        as.Date("2022-12-21"),
-        as.Date("2023-01-21"),
-        as.Date("2023-02-21"),
-        as.Date("2023-03-21"),
-        as.Date("2023-04-21"),
-        as.Date("2023-05-21"),
-        as.Date("2023-06-21"),
-        as.Date("2023-07-21")
-      )
+      payment_due_date %m-% months(1)
 
-    grace_period_end_date <-
-      c(
-        as.Date("2021-12-20"),
-        as.Date("2022-01-20"),
-        as.Date("2022-02-20"),
-        as.Date("2022-03-20"),
-        as.Date("2022-04-20"),
-        as.Date("2022-05-20"),
-        as.Date("2022-06-20"),
-        as.Date("2022-07-20"),
-        as.Date("2022-08-20"),
-        as.Date("2022-09-20"),
-        as.Date("2022-10-20"),
-        as.Date("2022-11-20"),
-        as.Date("2022-12-20"),
-        as.Date("2023-01-20"),
-        as.Date("2023-02-20"),
-        as.Date("2023-03-20"),
-        as.Date("2023-04-20"),
-        as.Date("2023-05-20"),
-        as.Date("2023-06-20"),
-        as.Date("2023-07-20"),
-        as.Date("2023-08-20")
-      )
-
-    iteration_lookup <-
+    schedule_lookup <-
       tibble::tibble(
-        payments_left = 21:1,
+        payments_left = "",
         grace_period_start_date =
           grace_period_start_date,
         grace_period_end_date =
           grace_period_end_date,
-        payment_due_date
-      )
+        payment_due_date)
+
+    schedule_lookup$payments_left <-
+      nrow(schedule_lookup):1
 
 
-    for (i in 1:nrow(iteration_lookup)) {
+
+    for (i in 1:nrow(schedule_lookup)) {
       start_date <-
-        iteration_lookup$grace_period_start_date[i]
+        schedule_lookup$grace_period_start_date[i]
 
       end_date <-
-        iteration_lookup$grace_period_end_date[i]
+        schedule_lookup$grace_period_end_date[i]
 
       if (Sys.Date() >= start_date) {
         if (Sys.Date() <= end_date) {
           payments_left <-
-            iteration_lookup$payments_left[i]
+            schedule_lookup$payments_left[i]
 
 
           out <-
             MonthlyPayment(
               value =
                 (balance - ending_balance) / payments_left,
-              payments_left = payments_left
+              payments_left = payments_left,
+              credit_limit = credit_limit,
+              ending_balance = ending_balance,
+              last_payment_date = last_due_date
             )
 
 
@@ -237,7 +205,7 @@ us_bank_payment <-
       as.Date(grace_period_end_date)
 
 
-    iteration_lookup <-
+    schedule_lookup <-
       tibble::tibble(
         payments_left = 20:1,
         grace_period_start_date =
@@ -247,17 +215,17 @@ us_bank_payment <-
         payment_due_dates
       )
 
-    for (i in 1:nrow(iteration_lookup)) {
+    for (i in 1:nrow(schedule_lookup)) {
       start_date <-
-        iteration_lookup$grace_period_start_date[i]
+        schedule_lookup$grace_period_start_date[i]
 
       end_date <-
-        iteration_lookup$grace_period_end_date[i]
+        schedule_lookup$grace_period_end_date[i]
 
       if (Sys.Date() >= start_date) {
         if (Sys.Date() <= end_date) {
           payments_left <-
-            iteration_lookup$payments_left[i]
+            schedule_lookup$payments_left[i]
 
 
           out <-

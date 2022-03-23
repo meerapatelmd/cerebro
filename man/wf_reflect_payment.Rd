@@ -4,7 +4,13 @@
 \alias{wf_reflect_payment}
 \title{Wells Fargo Reflect Credit Card Payment}
 \usage{
-wf_reflect_payment(balance)
+wf_reflect_payment(
+  balance,
+  first_due_date = "2021-12-21",
+  last_due_date = "2023-08-21",
+  credit_limit = 18000,
+  ending_balance = (18000/3)
+)
 }
 \description{
 Wells Fargo Reflect Credit Card Payment

@@ -1,7 +1,3 @@
-# df <-
-#   broca::read_cb()
-
-
 # Change from previous day
 calculate_delta <-
   function(x) {
