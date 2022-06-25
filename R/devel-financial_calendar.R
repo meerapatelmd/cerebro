@@ -97,7 +97,7 @@ generate_annual_ledger <-
       )
 
     raw_calendar_tbl_2 <-
-      left_join(raw_calendar_tbl,
+      dplyr::left_join(raw_calendar_tbl,
         weekday_index_map,
         by = "day_of_week"
       )
@@ -111,37 +111,37 @@ generate_annual_ledger <-
 
     raw_calendar_tbl_4 <-
       raw_calendar_tbl_3 %>%
-      map(fill_in_partial_1st_week) %>%
-      map(function(x) {
+      purrr::map(fill_in_partial_1st_week) %>%
+      purrr::map(function(x) {
         tidyr::pivot_wider(x,
           id_cols = c(week_number),
           names_from = day_of_week,
           values_from = month_day_number
         ) %>%
-          mutate_all(as.character) %>%
-          mutate_all(~ ifelse(is.na(.), "", .))
+          dplyr::mutate_all(as.character) %>%
+          dplyr::mutate_all(~ ifelse(is.na(.), "", .))
       }) %>%
-      bind_rows(.id = "month_name")
+      dplyr::bind_rows(.id = "month_name")
 
     out <-
       raw_calendar_tbl_4 %>%
-      pivot_longer(
+      tidyr::pivot_longer(
         cols = Sun:Sat,
         names_to = "day_of_week",
         values_to = "month_day_number"
       ) %>%
-      rowid_to_column(var = "day_slot_index") %>%
+      tibble::rowid_to_column(var = "day_slot_index") %>%
       dplyr::left_join(month_index_map,
         by = "month_name"
       ) %>%
-      mutate(
+      dplyr::mutate(
         year_date_str =
-          case_when(
+          dplyr::case_when(
             month_day_number != "" ~ sprintf("%s-%s-%s", year, month_number, month_day_number),
             TRUE ~ ""
           )
       ) %>%
-      mutate(year_date = ymd(year_date_str))
+      dplyr::mutate(year_date = ymd(year_date_str))
 
     class(out) <-
       c(
@@ -165,7 +165,7 @@ fill_in_partial_1st_week <-
       tibble$week_day_index[1]
     if (first_day_of_month_index == 1) {
       return(tibble %>%
-        mutate_all(as.character))
+        dplyr::mutate_all(as.character))
     } else {
 
       # Days to add to the partial first week
@@ -173,16 +173,16 @@ fill_in_partial_1st_week <-
         weekday_index_map %>%
         dplyr::slice(1:(first_day_of_month_index - 1)) %>%
         # No numbers (blank)
-        mutate(month_day_number = "") %>%
+        dplyr::mutate(month_day_number = "") %>%
         # Add week number
-        mutate(week_number = tibble$week_number[1])
+        dplyr::mutate(week_number = tibble$week_number[1])
 
-      bind_rows(
+      dplyr::bind_rows(
         days_to_add,
         tibble %>%
-          mutate(month_day_number = as.character(month_day_number))
+          dplyr::mutate(month_day_number = as.character(month_day_number))
       ) %>%
-        mutate_all(as.character)
+        dplyr::mutate_all(as.character)
     }
   }
 
@@ -195,32 +195,32 @@ ledger_to_cal <-
 
     extra_cols <-
       ledger_obj %>%
-      select(!any_of(core_cols)) %>%
+      dplyr::select(!any_of(core_cols)) %>%
       colnames()
 
     if (length(extra_cols) > 0) {
       value_df <-
         ledger_obj %>%
-        select(
+        dplyr::select(
           day_slot_index,
           month_day_number,
-          all_of(extra_cols)
+          dplyr::all_of(extra_cols)
         ) %>%
-        mutate_at(
-          vars(
+        dplyr::mutate_at(
+          dplyr::vars(
             month_day_number,
-            all_of(extra_cols)
+            dplyr::all_of(extra_cols)
           ),
           as.character
         ) %>%
-        mutate_at(
-          vars(
+        dplyr::mutate_at(
+          dplyr::vars(
             month_day_number,
-            all_of(extra_cols)
+            dplyr::all_of(extra_cols)
           ),
           ~ ifelse(is.na(.), " ", .)
         ) %>%
-        unite(
+        tidyr::unite(
           col = value,
           month_day_number,
           sep = "\n",
@@ -230,17 +230,17 @@ ledger_to_cal <-
 
       ledger_obj2 <-
         ledger_obj %>%
-        left_join(value_df,
+        dplyr::left_join(value_df,
           by = "day_slot_index"
         )
     } else {
       ledger_obj2 <-
         ledger_obj %>%
-        mutate(value = month_day_number)
+        dplyr::mutate(value = month_day_number)
     }
 
     out <-
-      pivot_wider(
+      tidyr::pivot_wider(
         data = ledger_obj2,
         id_cols = c(month_name, week_number),
         names_from = day_of_week,
@@ -248,7 +248,7 @@ ledger_to_cal <-
       )
 
     out <-
-      left_join(
+      dplyr::left_join(
         month_index_map,
         out,
         by = "month_name"
@@ -289,14 +289,14 @@ cal_to_tbl <-
         values_drop_na = FALSE
       ) %>%
       tibble::rowid_to_column(var = "day_slot_index") %>%
-      mutate(
+      dplyr::mutate(
         year_date_str =
-          case_when(
+          dplyr::case_when(
             month_day_number != "" ~ sprintf("%s-%s-%s", year, month_number, month_day_number),
             TRUE ~ ""
           )
       ) %>%
-      mutate(year_date = ymd(year_date_str))
+      dplyr::mutate(year_date = ymd(year_date_str))
 
     class(out) <-
       c(
@@ -324,7 +324,7 @@ get_paycheck_tbl <-
       lubridate::days_in_month(year_dates) %>%
       enframe() %>%
       distinct() %>%
-      mutate(
+      dplyr::mutate(
         month_number =
           stringr::str_pad(
             1:12,
@@ -372,7 +372,7 @@ add_paycheck <-
     if ("list" %in% class(year_obj)) {
       year_tibble <-
         year_obj %>%
-        reduce(left_join,
+        reduce(dplyr::left_join,
           by = "day_slot_index"
         )
     } else if ("year_cal" %in% class(year_obj)) {
@@ -389,7 +389,7 @@ add_paycheck <-
           name = "year_date",
           value = "custom_paycheck"
         ) %>%
-        mutate(year_date = ymd(year_date))
+        dplyr::mutate(year_date = ymd(year_date))
       custom_paycheck_map$custom_paycheck <-
         sprintf("+ %s", unlist(custom_paycheck_map$custom_paycheck))
     } else {
@@ -404,72 +404,72 @@ add_paycheck <-
 
     raw_calendar_tbl <-
       year_tibble %>%
-      mutate(month_day_number = as.integer(month_day_number))
+      dplyr::mutate(month_day_number = as.integer(month_day_number))
 
     pay_day_2_map <-
       raw_calendar_tbl %>%
       group_by(month_name) %>%
-      mutate(last_day_of_month = max(month_day_number, na.rm = TRUE)) %>%
+      dplyr::mutate(last_day_of_month = max(month_day_number, na.rm = TRUE)) %>%
       ungroup() %>%
       dplyr::filter(month_day_number == last_day_of_month) %>%
       dplyr::mutate(as.integer(last_day_of_month)) %>%
-      mutate(
+      dplyr::mutate(
         month_day_number =
-          case_when(
+          dplyr::case_when(
             day_of_week == "Sat" ~ as.double(last_day_of_month - 1),
             day_of_week == "Sun" ~ as.double(last_day_of_month - 2),
             TRUE ~ as.double(last_day_of_month)
           )
       ) %>%
-      select(month_name, month_day_number)
+      dplyr::select(month_name, month_day_number)
 
     pay_day_1_map <-
       raw_calendar_tbl %>%
       dplyr::filter(month_day_number == 15) %>%
-      mutate(
+      dplyr::mutate(
         month_day_number =
-          case_when(
+          dplyr::case_when(
             day_of_week == "Sat" ~ as.double(month_day_number - 1),
             day_of_week == "Sun" ~ as.double(month_day_number - 2),
             TRUE ~ as.double(month_day_number)
           )
       ) %>%
-      select(month_name, month_day_number)
+      dplyr::select(month_name, month_day_number)
 
 
     pay_day_map <-
-      bind_rows(
+      dplyr::bind_rows(
         pay_day_1_map,
         pay_day_2_map
       ) %>%
-      mutate_all(as.character) %>%
+      dplyr::mutate_all(as.character) %>%
       arrange(
         month_name,
         month_day_number
       ) %>%
-      mutate(pay_day_number = month_day_number)
+      dplyr::mutate(pay_day_number = month_day_number)
 
     pay_day_tibble <-
       year_tibble %>%
-      left_join(pay_day_map,
+      dplyr::left_join(pay_day_map,
         by = c("month_name", "month_day_number")
       ) %>%
-      mutate(year_date = as.character(year_date)) %>%
-      left_join(custom_paycheck_map %>%
-        mutate(
+      dplyr::mutate(year_date = as.character(year_date)) %>%
+      dplyr::left_join(custom_paycheck_map %>%
+        dplyr::mutate(
           year_date =
             as.character(year_date)
         ),
       by = "year_date"
       ) %>%
-      mutate(
+      dplyr::mutate(
         default_paycheck =
-          case_when(
+          dplyr::case_when(
             !is.na(pay_day_number) ~ sprintf("+ %s", default_paycheck),
             TRUE ~ NA_character_
           )
       ) %>%
-      mutate(
+      dplyr::mutate(
         paycheck =
           coalesce(
             custom_paycheck,
@@ -486,7 +486,7 @@ add_paycheck <-
         paycheck
       ) %>%
       dplyr::filter(!is.na(paycheck)) %>%
-      mutate_all(~ ifelse(is.na(.), "", .))
+      dplyr::mutate_all(~ ifelse(is.na(.), "", .))
 
     class(pay_day_map) <-
       c(
@@ -506,7 +506,7 @@ add_paycheck <-
         list(
           year_tibble =
             pay_day_tibble %>%
-              select(
+              dplyr::select(
                 -custom_paycheck,
                 -default_paycheck,
                 -paycheck,
@@ -527,7 +527,7 @@ subtract_payment <-
     if ("list" %in% class(year_obj)) {
       year_tibble <-
         year_obj %>%
-        reduce(left_join,
+        reduce(dplyr::left_join,
           by = "day_slot_index"
         )
     } else if ("year_cal" %in% class(year_obj)) {
@@ -544,14 +544,14 @@ subtract_payment <-
         name = "year_date",
         value = "payment"
       ) %>%
-      mutate(year_date = as.character(year_date)) %>%
+      dplyr::mutate(year_date = as.character(year_date)) %>%
       tidyr::unnest(cols = payment) %>%
-      mutate(payment = sprintf("- %s", payment))
+      dplyr::mutate(payment = sprintf("- %s", payment))
 
     payment_tibble <-
       year_tibble %>%
-      mutate(year_date = as.character(year_date)) %>%
-      left_join(payment_map,
+      dplyr::mutate(year_date = as.character(year_date)) %>%
+      dplyr::left_join(payment_map,
         by = "year_date"
       )
 
@@ -561,12 +561,12 @@ subtract_payment <-
         list(
           year_tibble =
             payment_tibble %>%
-              select(all_of(core_cols)),
+              dplyr::select(dplyr::all_of(core_cols)),
           pay_day_map =
             year_obj$pay_day_map,
           payment_map =
             payment_tibble %>%
-              select(
+              dplyr::select(
                 day_slot_index,
                 payment
               ) %>%
@@ -577,10 +577,10 @@ subtract_payment <-
         list(
           year_tibble =
             payment_tibble %>%
-              select(all_of(core_cols)),
+              dplyr::select(dplyr::all_of(core_cols)),
           payment_map =
             payment_tibble %>%
-              select(
+              dplyr::select(
                 day_slot_index,
                 payment
               ) %>%
