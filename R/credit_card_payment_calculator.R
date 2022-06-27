@@ -16,27 +16,22 @@ setMethod(
   f = "show",
   signature = "MonthlyPayment",
   definition = function(object) {
-    monthly_payment <- object@value
-    payments_left <- object@payments_left
-    credit_limit <- object@credit_limit
-    final_balance <- object@final_balance
-    last_due_date <- object@last_payment_date
-    cli::cli_text(
-      "{fmt_currency(monthly_payment)} at {payments_left} payments left."
-    )
-    cli::cli_text(
-      "Total Paid Off: {fmt_currency(payments_left*monthly_payment)}"
-    )
-    cli::cli_text(
-      "Ending Balance: {fmt_currency(final_balance)}"
-    )
-    cli::cli_text(
-      "Limit: {fmt_currency(credit_limit)}"
-    )
 
-    cli::cli_text(
-      "Last Due Date: {last_due_date}"
-    )
+    monthly_payment <- object@value
+    payments_left   <- object@payments_left
+    credit_limit    <- object@credit_limit
+    final_balance   <- object@final_balance
+    last_due_date   <- object@last_payment_date
+
+    cat(
+    glue::glue(
+      "{fmt_currency(monthly_payment)} at {payments_left} payments left.",
+      "Total Paid Off: {fmt_currency(payments_left*monthly_payment)}",
+      "Ending Balance: {fmt_currency(final_balance)}",
+      "Limit: {fmt_currency(credit_limit)}",
+      "Last Due Date: {last_due_date}",
+      .sep = "\n"
+    ))
   }
 )
 

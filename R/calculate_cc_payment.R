@@ -19,8 +19,10 @@ calculate_cc_payment <-
     if (missing(current_balance)) {
 
       cli::cli_alert_warning(
-        text = "{.var current_balance} not provided. Defaulting to {.var credit_limit} {.emph {fmt_currency(credit_limit)}} as {.var current_balance}."
+        text = "{.var current_balance} not provided. Defaulting to {.var credit_limit} {.emph {fmt_currency(credit_limit)}} as {.var current_balance}.",
+        wrap = TRUE
       )
+      cat("\n")
 
       current_balance <- credit_limit
 
@@ -52,8 +54,6 @@ calculate_cc_payment <-
 
     schedule_lookup$payments_left <-
       nrow(schedule_lookup):1
-
-
 
     for (i in 1:nrow(schedule_lookup)) {
       start_date <-
@@ -121,6 +121,102 @@ calculate_usbank_payment <-
     final_payment_due  = "2023-04-16",
     credit_limit   = 10000,
     final_balance = 3000) {
+
+
+    calculate_cc_payment(
+      current_balance = current_balance,
+      first_payment_due = first_payment_due,
+      final_payment_due = final_payment_due,
+      credit_limit = credit_limit,
+      final_balance = final_balance
+    )
+
+  }
+
+#' @title Calculate Citizens Payment
+#' @rdname calculate_citizens_payment
+#' @export
+
+calculate_citizens_payment <-
+  function(
+    current_balance,
+    first_payment_due = "2022-04-29",
+    final_payment_due  = "2023-10-29",
+    credit_limit   = 10000,
+    final_balance = 3000) {
+
+
+    calculate_cc_payment(
+      current_balance = current_balance,
+      first_payment_due = first_payment_due,
+      final_payment_due = final_payment_due,
+      credit_limit = credit_limit,
+      final_balance = final_balance
+    )
+
+  }
+
+
+
+#' @title Calculate Southwest Payment
+#' @rdname calculate_southwest_payment
+#' @export
+
+calculate_southwest_payment <-
+  function(
+    current_balance = 416,
+    first_payment_due = "2022-04-17",
+    final_payment_due  = "2023-05-17",
+    credit_limit   = 10000,
+    final_balance = 0) {
+
+
+    calculate_cc_payment(
+      current_balance = current_balance,
+      first_payment_due = first_payment_due,
+      final_payment_due = final_payment_due,
+      credit_limit = credit_limit,
+      final_balance = final_balance
+    )
+
+  }
+
+
+#' @title Calculate Slate Payment
+#' @rdname calculate_slate_payment
+#' @export
+
+calculate_slate_payment <-
+  function(
+    current_balance = 364,
+    first_payment_due = "2022-04-20",
+    final_payment_due  = "2023-05-20",
+    credit_limit   = 10000,
+    final_balance = 0) {
+
+
+    calculate_cc_payment(
+      current_balance = current_balance,
+      first_payment_due = first_payment_due,
+      final_payment_due = final_payment_due,
+      credit_limit = credit_limit,
+      final_balance = final_balance
+    )
+
+  }
+
+
+#' @title Calculate Freedom Payment
+#' @rdname calculate_freedom_payment
+#' @export
+
+calculate_freedom_payment <-
+  function(
+    current_balance = 364,
+    first_payment_due = "2022-04-20",
+    final_payment_due  = "2023-06-20",
+    credit_limit   = 10000,
+    final_balance = 0) {
 
 
     calculate_cc_payment(
