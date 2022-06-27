@@ -24,7 +24,7 @@ if (!dir.exists(output_dir)) {
 # in the reverse direction when I want to retrieve the
 # data
 filename <-
-stringr::str_replace_all( "as of 02:58 PM ET 06/23/22",
+stringr::str_replace_all( test_output$Date,
                         pattern = "(^.*?)([0-9]{1,}.*$)",
                         replacement = "\\2"
                         )
@@ -32,7 +32,8 @@ stringr::str_replace_all( "as of 02:58 PM ET 06/23/22",
 # If it is date only, lubridate
 # will parse it
 
-normalized_filename <- lubridate::mdy(filename)
+normalized_filename <- lubridate::mdy(filename,
+                                      quiet = TRUE)
 
 if (!is.na(normalized_filename)) {
 
@@ -82,6 +83,13 @@ if (!is.na(normalized_filename)) {
 
 }
 
+if (is.na(normalized_filename)) {
+
+  cli::cli_abort("Normalized filename could not be derived from {.var Date} value '{test_output$Date}'",
+                 call = NULL)
+
+}
+
 output_file_path <-
   file.path(output_dir,
             normalized_filename)
@@ -107,7 +115,6 @@ final_output <-
     `Raw Data` = `Raw Data`
   )
 
-library(openxlsx)
 openxlsx::write.xlsx(
   x = final_output,
   file = output_file_path
