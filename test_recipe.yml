@@ -1,7 +1,5 @@
 - categories: []
   cook_time: 45 mins
-  description: ''
-  difficulty: ''
   directions:
   - Heat olive oil in a large skillet over medium heat; cook and stir onion and garlic
     until browned and fragrant, 3 to 4 minutes. Add collard greens and red pepper
@@ -21,10 +19,6 @@
   - \"\xBC teaspoon liquid smoke flavoring\"
   - \"\xBC teaspoon smoked paprika\"
   name: Smoky Vegetarian Collard Greens
-  notes: ''
   prep_time: 15 mins
-  rating: 0
-  scale: null
-  servings: 'Servings: 4'
   source: Allrecipes.com
   source_url: https://www.allrecipes.com/recipe/256591/smoky-vegetarian-collard-greens/
