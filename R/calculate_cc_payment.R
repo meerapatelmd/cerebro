@@ -119,7 +119,7 @@ calculate_usbank_payment <-
     current_balance,
     first_payment_due = "2021-09-16",
     final_payment_due  = "2023-04-16",
-    credit_limit   = 10000,
+    credit_limit   = 13000,
     final_balance = 3000) {
 
 
@@ -215,6 +215,53 @@ calculate_freedom_payment <-
     current_balance = 364,
     first_payment_due = "2022-04-20",
     final_payment_due  = "2023-06-20",
+    credit_limit   = 10000,
+    final_balance = 0) {
+
+
+    calculate_cc_payment(
+      current_balance = current_balance,
+      first_payment_due = first_payment_due,
+      final_payment_due = final_payment_due,
+      credit_limit = credit_limit,
+      final_balance = final_balance
+    )
+
+  }
+
+#' @title Calculate Capital One Payment
+#' @rdname calculate_capitalone_payment
+#' @export
+
+calculate_capitalone_payment <-
+  function(
+    current_balance = 2773,
+    first_payment_due = "2022-06-17",
+    final_payment_due  = "2023-06-17",
+    credit_limit   = 15000,
+    final_balance = 0) {
+
+
+    calculate_cc_payment(
+      current_balance = current_balance,
+      first_payment_due = first_payment_due,
+      final_payment_due = final_payment_due,
+      credit_limit = credit_limit,
+      final_balance = final_balance
+    )
+
+  }
+
+
+#' @title Calculate Simplicity Payment
+#' @rdname calculate_simplicity_payment
+#' @export
+
+calculate_simplicity_payment <-
+  function(
+    current_balance = 291,
+    first_payment_due = "2022-06-21",
+    final_payment_due  = "2023-05-21",
     credit_limit   = 10000,
     final_balance = 0) {
 
